@@ -1,0 +1,13 @@
+controllers\EditMovieServlet.class
+servlets\MovieListServlet.class
+com\mycompany\mavenproject4\resources\JakartaEE10Resource.class
+controllers\WelcomeServlet.class
+servlets\LoginServlet.class
+InitDB.class
+servlets\RegisterServlet.class
+com\mycompany\mavenproject4\JakartaRestConfiguration.class
+model\Movie.class
+servlets\AddMovieServlet.class
+utils\DBUtil.class
+dao\MovieDAO.class
+servlets\MoviesServlet.class

@@ -1,0 +1,42 @@
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+                             http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" 
+         version="3.0">
+    
+    <servlet>
+    <servlet-name>MoviesServlet</servlet-name>
+    <servlet-class>servlets.MoviesServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>MoviesServlet</servlet-name>
+    <url-pattern>/MoviesServlet</url-pattern>
+</servlet-mapping>
+
+
+    <!--  اضافة فيلم -->
+    <servlet>
+    <servlet-name>AddMovieServlet</servlet-name>
+    <servlet-class>servlets.AddMovieServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>AddMovieServlet</servlet-name>
+    <url-pattern>/AddMovieServlet</url-pattern>
+</servlet-mapping>
+    <!--  اضافة فيلم -->
+ <!-- تسجيل الدخول -->
+    <servlet>
+    <servlet-name>LoginServlet</servlet-name>
+    <servlet-class>servlets.LoginServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+    <servlet-name>LoginServlet</servlet-name>
+    <url-pattern>/LoginServlet</url-pattern>
+</servlet-mapping>
+    <welcome-file-list>
+        <welcome-file>login.jsp</welcome-file>
+    </welcome-file-list>
+ <!-- تسجيل الدخول  -->
+</web-app>
