@@ -1,13 +1,16 @@
 package model;
 
 public class Movie {
-     private int id;
+    private int id;
     private String title;
     private String releaseDate;
     private double rating;
     private String description;
     private String imageUrl;
     private String trailerUrl;
+    
+    // ✅ خاصية لمعرفة ما إذا كان الفيلم مفضلًا من قبل المستخدم
+    private boolean favorited;
 
     // المنشئ الفارغ
     public Movie() {
@@ -44,5 +47,14 @@ public class Movie {
 
     public void setPosterUrl(String string) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    // ✅ Getter و Setter للـ favorited
+    public boolean isFavorited() {
+        return favorited;
+    }
+
+    public void setFavorited(boolean favorited) {
+        this.favorited = favorited;
     }
 }

@@ -6,9 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import utils.DBUtil;
-import java.io.*;
-//import javax.servlet.*;
-//import javax.servlet.http.*;
+import java.io.IOException;
 import java.sql.*;
 
 public class LoginServlet extends HttpServlet {
@@ -25,8 +23,22 @@ public class LoginServlet extends HttpServlet {
 
             if (rs.next()) {
                 HttpSession session = request.getSession();
+
+                // ✅ إضافة userId إلى الجلسة
+                int userId = rs.getInt("id");
+                session.setAttribute("userId", userId);
+
                 session.setAttribute("username", username);
-                response.sendRedirect("MoviesServlet");
+
+                // تحديد نوع المستخدم
+                if ("1".equals(username) && "1".equals(password)) {
+                    session.setAttribute("role", "admin");
+                } else {
+                    session.setAttribute("role", "user");
+                }
+
+                // ✅ إعادة التوجيه بعد حفظ جميع البيانات
+                response.sendRedirect("welcome");
             } else {
                 response.sendRedirect("login.jsp?error=1");
             }

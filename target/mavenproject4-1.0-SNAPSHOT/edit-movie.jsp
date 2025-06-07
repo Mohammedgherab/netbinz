@@ -129,7 +129,7 @@
 
         <div class="buttons">
             <input type="submit" value="💾 حفظ التعديلات">
-            <a href="MoviesServlet">🔙 العودة</a>
+            <a href="welcome">🔙 العودة</a>
         </div>
     </form>
 </div>

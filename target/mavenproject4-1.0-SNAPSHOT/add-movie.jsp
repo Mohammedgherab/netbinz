@@ -1,9 +1,3 @@
-<%-- 
-    Document   : add-movie
-    Created on : Jun 2, 2025, 11:47:28 AM
-    Author     : mohamed gherab
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -46,10 +40,19 @@
             border-radius: 6px;
             font-size: 16px;
             cursor: pointer;
+            margin-top: 10px;
         }
 
         button:hover {
             background-color: #219150;
+        }
+
+        .back-button {
+            background-color: #3498db;
+        }
+
+        .back-button:hover {
+            background-color: #2980b9;
         }
     </style>
 </head>
@@ -64,6 +67,11 @@
             <input type="text" name="imageUrl" placeholder="اسم ملف الصورة (مثلاً: 1.jpg)" required>
             <input type="text" name="trailerUrl" placeholder="رابط التريلر (YouTube أو غيره)">
             <button type="submit">💾 حفظ الفيلم</button>
+        </form>
+
+        <!-- زر العودة إلى القائمة الرئيسية -->
+        <form action="welcome" method="get">
+            <button type="submit" class="back-button">🏠 العودة إلى القائمة الرئيسية</button>
         </form>
     </div>
 </body>

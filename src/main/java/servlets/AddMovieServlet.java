@@ -23,6 +23,6 @@ public class AddMovieServlet extends HttpServlet {
         MovieDAO dao = new MovieDAO();
         dao.addMovie(movie);
 
-        response.sendRedirect("MoviesServlet");
+        response.sendRedirect("welcome");
     }
 }

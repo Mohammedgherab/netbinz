@@ -39,4 +39,6 @@
         <welcome-file>login.jsp</welcome-file>
     </welcome-file-list>
  <!-- تسجيل الدخول  -->
+ <!-- إضافة/إزالة من المفضلة -->
+
 </web-app>
