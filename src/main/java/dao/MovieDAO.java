@@ -1,64 +1,58 @@
 package dao;
-import utils.DBUtil;
-import java.sql.*;
+
+import utils.DBUtil; // لاستدعاء أداة الاتصال بقاعدة البيانات
+import java.sql.*; // استيراد مكتبة JDBC
 import java.util.ArrayList;
 import java.util.List;
-import model.Movie;
-import static utils.DBUtil.getConnection;
+import model.Movie; // استيراد الكلاس Movie الذي يمثل بيانات الفيلم
 
 public class MovieDAO {
 
-    public static void addFavorite(String userId, int movieId) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    // 🔁 دالة مساعدة لتحويل بيانات ResultSet إلى كائن Movie
+    private static Movie mapResultSetToMovie(ResultSet rs) throws SQLException {
+        Movie m = new Movie(); // إنشاء كائن جديد من نوع Movie
+        m.setId(rs.getInt("id")); // تعيين المعرّف
+        m.setTitle(rs.getString("title")); // تعيين العنوان
+        m.setReleaseDate(rs.getString("release_date")); // تعيين تاريخ الإصدار
+        m.setRating(rs.getDouble("rating")); // تعيين التقييم
+        m.setDescription(rs.getString("description")); // تعيين الوصف
+        m.setImageUrl(rs.getString("image_url")); // تعيين رابط الصورة
+        m.setTrailerUrl(rs.getString("trailer_url")); // تعيين رابط العرض الترويجي
+        return m; // إرجاع كائن الفيلم
     }
 
-    // ✅ جلب كل الأفلام
+    // 📥 جلب جميع الأفلام من قاعدة البيانات
     public List<Movie> getAllMovies() {
         List<Movie> movies = new ArrayList<>();
 
-        try (Connection conn = getConnection()) {
-            String query = "SELECT * FROM movies";
-            PreparedStatement ps = conn.prepareStatement(query);
-            ResultSet rs = ps.executeQuery();
+        try (Connection conn = DBUtil.getConnection()) {
+            String query = "SELECT * FROM movies"; // استعلام لجلب كل الأفلام
+            PreparedStatement ps = conn.prepareStatement(query); // تجهيز الاستعلام
+            ResultSet rs = ps.executeQuery(); // تنفيذ الاستعلام
 
             while (rs.next()) {
-                Movie m = new Movie();
-                m.setId(rs.getInt("id"));
-                m.setTitle(rs.getString("title"));
-                m.setReleaseDate(rs.getString("release_date"));
-                m.setRating(rs.getDouble("rating"));
-                m.setDescription(rs.getString("description"));
-                m.setImageUrl(rs.getString("image_url"));
-                m.setTrailerUrl(rs.getString("trailer_url"));
-                movies.add(m);
+                movies.add(mapResultSetToMovie(rs)); // تحويل كل صف إلى كائن Movie
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(); // طباعة الخطأ إذا حصل
         }
 
-        return movies;
+        return movies; // إرجاع قائمة الأفلام
     }
 
-    // ✅ جلب فيلم باستخدام المعرف
+    // 🔍 جلب فيلم باستخدام المعرّف
     public Movie getMovieById(int id) {
         Movie movie = null;
 
-        try (Connection conn = getConnection()) {
+        try (Connection conn = DBUtil.getConnection()) {
             String sql = "SELECT * FROM movies WHERE id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, id);
+            stmt.setInt(1, id); // تعيين المعرّف في الاستعلام
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                movie = new Movie();
-                movie.setId(rs.getInt("id"));
-                movie.setTitle(rs.getString("title"));
-                movie.setReleaseDate(rs.getString("release_date"));
-                movie.setRating(rs.getDouble("rating"));
-                movie.setImageUrl(rs.getString("image_url"));
-                movie.setTrailerUrl(rs.getString("trailer_url"));
-                movie.setDescription(rs.getString("description"));
+                movie = mapResultSetToMovie(rs); // تحويل النتيجة إلى كائن Movie
             }
 
         } catch (Exception e) {
@@ -68,12 +62,13 @@ public class MovieDAO {
         return movie;
     }
 
-    // ✅ إضافة فيلم جديد
+    // ➕ إضافة فيلم جديد
     public void addMovie(Movie movie) {
-        try (Connection conn = getConnection()) {
-            String sql = "INSERT INTO movies (title, release_date, rating, image_url, trailer_url, description) " +
-                         "VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DBUtil.getConnection()) {
+            String sql = "INSERT INTO movies (title, release_date, rating, image_url, trailer_url, description) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
+
+            // تعيين القيم في الاستعلام
             stmt.setString(1, movie.getTitle());
             stmt.setString(2, movie.getReleaseDate());
             stmt.setDouble(3, movie.getRating());
@@ -81,108 +76,88 @@ public class MovieDAO {
             stmt.setString(5, movie.getTrailerUrl());
             stmt.setString(6, movie.getDescription());
 
-            int rows = stmt.executeUpdate();
-            System.out.println("✅ تمت إضافة " + rows + " فيلم(ـاً) إلى قاعدة البيانات.");
+            stmt.executeUpdate(); // تنفيذ عملية الإدخال
+            System.out.println("✅ تم إضافة الفيلم بنجاح.");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // ✅ تحديث معلومات فيلم
+    // ✏️ تعديل بيانات فيلم
     public void updateMovie(Movie movie) {
-        try (Connection conn = getConnection()) {
-            String sql = "UPDATE movies SET title = ?, release_date = ?, rating = ?, image_url = ?, trailer_url = ?, description = ? " +
-                         "WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection()) {
+            String sql = "UPDATE movies SET title = ?, release_date = ?, rating = ?, image_url = ?, trailer_url = ?, description = ? WHERE id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
+
+            // تعيين القيم الجديدة
             stmt.setString(1, movie.getTitle());
             stmt.setString(2, movie.getReleaseDate());
             stmt.setDouble(3, movie.getRating());
             stmt.setString(4, movie.getImageUrl());
             stmt.setString(5, movie.getTrailerUrl());
             stmt.setString(6, movie.getDescription());
-            stmt.setInt(7, movie.getId());
+            stmt.setInt(7, movie.getId()); // تحديد الفيلم بالتعديل
 
-            int rows = stmt.executeUpdate();
-            System.out.println("✏️ تم تعديل " + rows + " فيلم(ـاً) بنجاح.");
+            stmt.executeUpdate(); // تنفيذ التحديث
+            System.out.println("✏️ تم تعديل الفيلم بنجاح.");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // ✅ حذف فيلم
+    // 🗑️ حذف فيلم باستخدام ID
     public void deleteMovie(int id) {
-        try (Connection conn = getConnection()) {
+        try (Connection conn = DBUtil.getConnection()) {
             String sql = "DELETE FROM movies WHERE id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, id);
-
-            int rows = stmt.executeUpdate();
-            System.out.println("🗑️ تم حذف " + rows + " فيلم(ـاً) من قاعدة البيانات.");
+            stmt.setInt(1, id); // تعيين معرف الفيلم المراد حذفه
+            stmt.executeUpdate(); // تنفيذ الحذف
+            System.out.println("🗑️ تم حذف الفيلم بنجاح.");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // ✅ جلب الأفلام المفضلة لمستخدم معين
-    public List<Movie> getFavoriteMovies(String userId) {
-        List<Movie> favoriteMovies = new ArrayList<>();
+    // 🌟 جلب قائمة الأفلام المفضلة لمستخدم معين
+    public static List<Movie> getFavoriteMovies(int userId) {
+        List<Movie> favorites = new ArrayList<>();
 
-        try (Connection conn = getConnection()) {
-            String sql = "SELECT m.* FROM movies m " +
-                         "JOIN favorites f ON m.id = f.movie_id " +
-                         "WHERE f.user_id = ?";
+        try (Connection conn = DBUtil.getConnection()) {
+            String sql = "SELECT m.* FROM movies m JOIN favorites f ON m.id = f.movie_id WHERE f.user_id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, userId);
+            stmt.setInt(1, userId); // تحديد المستخدم
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                Movie m = new Movie();
-                m.setId(rs.getInt("id"));
-                m.setTitle(rs.getString("title"));
-                m.setReleaseDate(rs.getString("release_date"));
-                m.setRating(rs.getDouble("rating"));
-                m.setDescription(rs.getString("description"));
-                m.setImageUrl(rs.getString("image_url"));
-                m.setTrailerUrl(rs.getString("trailer_url"));
-                favoriteMovies.add(m);
+                favorites.add(mapResultSetToMovie(rs)); // تحويل الصف إلى كائن Movie
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return favoriteMovies;
+        return favorites; // إرجاع قائمة المفضلات
     }
 
-    // ✅ إضافة/إزالة مفضلة (حسب الحالة الحالية)
-    public boolean toggleFavorite(String userId, int movieId) {
+    // 🔁 تبديل حالة فيلم في المفضلة
+    public boolean toggleFavorite(int userId, int movieId) {
         boolean isNowFavorited = false;
 
-        try (Connection conn = getConnection()) {
-            // التحقق مما إذا كانت المفضلة موجودة
-            String checkSql = "SELECT COUNT(*) FROM favorites WHERE user_id = ? AND movie_id = ?";
+        try (Connection conn = DBUtil.getConnection()) {
+            // التحقق هل الفيلم مضاف مسبقًا للمفضلة
+            String checkSql = "SELECT 1 FROM favorites WHERE user_id = ? AND movie_id = ?";
             PreparedStatement checkStmt = conn.prepareStatement(checkSql);
-            checkStmt.setString(1, userId);
+            checkStmt.setInt(1, userId);
             checkStmt.setInt(2, movieId);
             ResultSet rs = checkStmt.executeQuery();
-            rs.next();
-            int count = rs.getInt(1);
 
-            if (count > 0) {
-                // إذا كانت موجودة، يتم حذفها
-                String deleteSql = "DELETE FROM favorites WHERE user_id = ? AND movie_id = ?";
-                PreparedStatement delStmt = conn.prepareStatement(deleteSql);
-                delStmt.setString(1, userId);
-                delStmt.setInt(2, movieId);
-                delStmt.executeUpdate();
+            if (rs.next()) {
+                // إذا كان مضافًا، نحذفه من المفضلة
+                removeFavorite(userId, movieId);
                 isNowFavorited = false;
             } else {
-                // إذا لم تكن موجودة، يتم إضافتها
-                String insertSql = "INSERT INTO favorites (user_id, movie_id) VALUES (?, ?)";
-                PreparedStatement insertStmt = conn.prepareStatement(insertSql);
-                insertStmt.setString(1, userId);
-                insertStmt.setInt(2, movieId);
-                insertStmt.executeUpdate();
+                // إذا لم يكن مضافًا، نضيفه
+                addFavorite(userId, movieId);
                 isNowFavorited = true;
             }
 
@@ -192,10 +167,9 @@ public class MovieDAO {
 
         return isNowFavorited;
     }
-    // ✅ التحقق مما إذا كان الفيلم مفضلاً
- public static boolean isFavorited(int userId, int movieId) {
-        boolean favorited = false;
 
+    // ❓ التحقق إذا كان فيلم مفضّل فعلاً من قبل المستخدم
+    public static boolean isFavorited(int userId, int movieId) {
         try (Connection conn = DBUtil.getConnection()) {
             String sql = "SELECT 1 FROM favorites WHERE user_id = ? AND movie_id = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -203,15 +177,14 @@ public class MovieDAO {
             stmt.setInt(2, movieId);
             ResultSet rs = stmt.executeQuery();
 
-            favorited = rs.next(); // إذا وجدت نتيجة، يعني أنه مفضل
+            return rs.next(); // إرجاع true إذا وُجد صف واحد
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-
-        return favorited;
     }
 
-    // ✅ إضافة فيلم للمفضلة
+    // ➕ إضافة فيلم إلى المفضلة
     public static void addFavorite(int userId, int movieId) {
         try (Connection conn = DBUtil.getConnection()) {
             String sql = "INSERT INTO favorites (user_id, movie_id) VALUES (?, ?)";
@@ -224,7 +197,7 @@ public class MovieDAO {
         }
     }
 
-    // ✅ إزالة فيلم من المفضلة
+    // ❌ إزالة فيلم من المفضلة
     public static void removeFavorite(int userId, int movieId) {
         try (Connection conn = DBUtil.getConnection()) {
             String sql = "DELETE FROM favorites WHERE user_id = ? AND movie_id = ?";
@@ -236,6 +209,4 @@ public class MovieDAO {
             e.printStackTrace();
         }
     }
-
-
 }

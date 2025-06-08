@@ -10,5 +10,4 @@ model\Movie.class
 servlets\AddMovieServlet.class
 utils\DBUtil.class
 dao\MovieDAO.class
-servlets\ToggleFavoriteServlet.class
 servlets\MoviesServlet.class

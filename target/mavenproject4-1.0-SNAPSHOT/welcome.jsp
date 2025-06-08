@@ -1,17 +1,18 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
-<%@ page import="java.util.*, model.Movie, model.FavoriteDAO" %>
-<%@ page import="dao.MovieDAO" %>
+<%@ page import="java.util.*, model.Movie, dao.MovieDAO" %>
 
 <%
-    // تحقق من الجلسة
-    String role = (String) session.getAttribute("role");
-    if (role == null) {
-        response.sendRedirect("login.jsp");
-        return;
-    }
+    // إعدادات تمنع التخزين المؤقت للصفحة (لحماية البيانات الحساسة بعد تسجيل الخروج)
+    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    response.setHeader("Pragma", "no-cache");
+    response.setDateHeader("Expires", 0);
 
+    // التحقق من وجود مستخدم مسجل الدخول
+    String role = (String) session.getAttribute("role");
     Integer userId = (Integer) session.getAttribute("userId");
-    if (userId == null) {
+
+    // إعادة التوجيه لصفحة تسجيل الدخول إذا لم يكن المستخدم مسجلاً
+    if (role == null || userId == null) {
         response.sendRedirect("login.jsp");
         return;
     }
@@ -22,8 +23,10 @@
 <head>
     <meta charset="UTF-8">
     <title>أحدث الأفلام</title>
+
+    <!-- تنسيقات CSS مدمجة -->
     <style>
-        /* تنسيقات CSS كما هي دون تغيير */
+        /* إعداد متغيرات الألوان */
         :root {
             --primary-color: #4a90e2;
             --secondary-color: #f5f7fa;
@@ -37,6 +40,7 @@
             --delete-hover: #c0392b;
         }
 
+        /* تنسيق عام للجسم */
         body {
             margin: 0;
             font-family: 'Cairo', sans-serif;
@@ -44,6 +48,7 @@
             color: var(--text-color);
         }
 
+        /* شريط التنقل */
         .navbar {
             background-color: var(--primary-color);
             display: flex;
@@ -66,6 +71,7 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
 
+        /* زر تسجيل الخروج */
         .logout {
             background-color: var(--delete-color);
         }
@@ -74,6 +80,7 @@
             background-color: var(--delete-hover);
         }
 
+        /* عنوان القسم */
         .section-header {
             padding: 20px 30px;
             font-size: 22px;
@@ -85,6 +92,7 @@
             box-shadow: 0 1px 4px rgba(0,0,0,0.1);
         }
 
+        /* زر إضافة فيلم */
         .add-button {
             background-color: var(--button-bg);
             color: white;
@@ -99,6 +107,7 @@
             background-color: var(--button-hover-bg);
         }
 
+        /* شبكة الأفلام */
         .movies-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -106,6 +115,7 @@
             padding: 30px;
         }
 
+        /* بطاقة الفيلم */
         .movie-card {
             background-color: var(--card-bg);
             border-radius: 10px;
@@ -119,12 +129,14 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
+        /* صورة الفيلم */
         .movie-card img {
             width: 100%;
             height: 260px;
             object-fit: cover;
         }
 
+        /* معلومات الفيلم */
         .movie-info {
             padding: 15px;
         }
@@ -152,6 +164,7 @@
             display: inline-block;
         }
 
+        /* روابط التعديل والحذف */
         .movie-actions {
             margin-top: 12px;
         }
@@ -183,6 +196,7 @@
             background-color: var(--delete-hover);
         }
 
+        /* رسالة في حال عدم وجود أفلام */
         .no-movies {
             text-align: center;
             font-size: 18px;
@@ -190,6 +204,7 @@
             padding: 50px;
         }
 
+        /* أيقونة المفضلة */
         .movie-favorite {
             display: inline-block;
             font-size: 18px;
@@ -203,6 +218,7 @@
             color: red;
         }
 
+        /* تحسين العرض على الشاشات الصغيرة */
         @media (max-width: 600px) {
             .section-header {
                 flex-direction: column;
@@ -219,12 +235,13 @@
 </head>
 <body>
 
+<!-- شريط التنقل العلوي -->
 <div class="navbar">
     <a href="welcome">🏠 الصفحة الرئيسية</a>
-    <a href="favorites.jsp">📌 المفضلة</a>
     <a href="logout.jsp" class="logout">🚪 تسجيل الخروج</a>
 </div>
 
+<!-- عنوان القسم وزر إضافة فيلم (للمسؤول فقط) -->
 <div class="section-header">
     🎬 الأفلام المضافة حديثًا
     <% if ("admin".equals(role)) { %>
@@ -232,27 +249,29 @@
     <% } %>
 </div>
 
+<!-- عرض الأفلام -->
 <div class="movies-grid">
 <%
+    // الحصول على قائمة الأفلام من الـ request
     List<Movie> movies = (List<Movie>) request.getAttribute("movies");
     if (movies != null && !movies.isEmpty()) {
         for (Movie m : movies) {
+            // التحقق إن كان الفيلم مفضلاً من قبل المستخدم
+            boolean isFav = MovieDAO.isFavorited(userId, m.getId());
 %>
+    <!-- بطاقة الفيلم -->
     <div class="movie-card">
+        <!-- عند الضغط على الصورة يتم فتح رابط العرض -->
         <a href="<%= m.getTrailerUrl() %>" target="_blank">
-            <img src="images/<%= m.getImageUrl() %>" alt="<%= m.getTitle() %>">
+            <img src="images/<%= java.net.URLEncoder.encode(m.getImageUrl(), "UTF-8") %>" alt="<%= m.getTitle() %>">
         </a>
         <div class="movie-info">
             <div class="movie-title"><%= m.getTitle() %></div>
             <div class="movie-date">📅 <%= m.getReleaseDate() %></div>
-            <div class="movie-rating">⭐ <%= m.getRating() %>
-              <span class="movie-favorite <%= MovieDAO.isFavorited(userId, m.getId()) ? "liked" : "" %>" 
-      data-movie-id="<%= m.getId() %>">
-    <%= MovieDAO.isFavorited(userId, m.getId()) ? "❤️" : "🤍" %>
-</span>
-            </div>
+            <div class="movie-rating">⭐ <%= m.getRating() %></div>
 
             <% if ("admin".equals(role)) { %>
+            <!-- روابط التعديل والحذف للمسؤول فقط -->
             <div class="movie-actions">
                 <a href="edit-movie?id=<%= m.getId() %>" class="edit">✏️ تعديل</a>
                 <a href="delete-movie.jsp?id=<%= m.getId() %>" class="delete"
@@ -265,39 +284,12 @@
         }
     } else {
 %>
+    <!-- رسالة في حال عدم وجود أفلام -->
     <div class="no-movies">🚫 لا توجد أفلام مضافة حالياً.</div>
 <%
     }
 %>
 </div>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".movie-favorite").forEach(function (heart) {
-        heart.addEventListener("click", function () {
-            const movieId = heart.getAttribute("data-movie-id");
-
-            fetch("toggle-favorite", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: "movieId=" + encodeURIComponent(movieId)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.favorited) {
-                    heart.textContent = "❤️";
-                    heart.classList.add("liked");
-                } else {
-                    heart.textContent = "🤍";
-                    heart.classList.remove("liked");
-                }
-            });
-        });
-    });
-});
-</script>
 
 </body>
 </html>
